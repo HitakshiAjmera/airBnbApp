@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public class RoomServiceImpl implements RoomService{
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
+    private final InventoryService inventoryService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -33,7 +35,13 @@ public class RoomServiceImpl implements RoomService{
         Room room = modelMapper.map(roomDto,Room.class);
         room.setHotel(hotel);
         room = roomRepository.save(room);
+
+        if(hotel.getActive()){
+            inventoryService.initializeRoomForYear(room);
+        }
+
         log.info("Created a new room in hotel with id: {}",hotelId);
+
         return modelMapper.map(room,RoomDto.class);
     }
 
@@ -62,11 +70,16 @@ public class RoomServiceImpl implements RoomService{
     }
 
     @Override
+    @Transactional
     public void deleteRoomById(Long id) {
 
         log.info("Deleting Room by id {}",id);
-        Boolean isExits = roomRepository.existsById(id);
-        if(!isExits) throw new ResourceNotFoundException("Room not found with id :"+id);
+        /*Boolean isExits = roomRepository.existsById(id);
+        if(!isExits) throw new ResourceNotFoundException("Room not found with id :"+id);*/
+        Room room = roomRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Room not found with id "));
+
+        //inventoryService.deleteFutureInventories(room);
         roomRepository.deleteById(id);
     }
 }
