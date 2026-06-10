@@ -1,5 +1,6 @@
 package com.hitakshi.project.airBnbApp.entity;
 
+import com.hitakshi.project.airBnbApp.dto.RoomDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,5 +42,9 @@ public class Hotel {
 
     @Column(nullable = false)
     private Boolean active;
+
+    @OneToMany(mappedBy = "hotel")
+    private List<Room> rooms;
+
 
 }
