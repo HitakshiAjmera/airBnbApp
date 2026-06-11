@@ -5,5 +5,5 @@ import com.hitakshi.project.airBnbApp.entity.Room;
 public interface InventoryService {
 
     void initializeRoomForYear(Room roomId);
-    void deleteFutureInventories(Room room);
+    void deleteAllInventoriesOfRoom(Room room);
 }
